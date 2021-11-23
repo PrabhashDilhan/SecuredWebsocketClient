@@ -9,5 +9,5 @@
 <li>keypassword:fsdfsd</li>
 </ul>
 
-## How to run the client with ssl debug logs enabled <br />
+## How to run the client <br />
 **java -jar wesocketclient-1.0-jar-with-dependencies.jar path-to-config.properties-file**
