@@ -1,12 +1,14 @@
 package org.wso2.websocket;
 
 import java.io.*;
+import java.net.Socket;
 import java.net.URI;
 import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
+import javax.net.SocketFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -79,38 +81,46 @@ public class SSLClientExample {
         String keystorepath = prop.getProperty("keystorepath");
         String storepassword = prop.getProperty("storepassword");
         String keypassword = prop.getProperty("keypassword");
+        boolean issecured = Boolean.parseBoolean(prop.getProperty("issecured"));
 
         Map<String,String> httpHeaders = new HashMap<String,String>();;
         httpHeaders.put("Authorization","Bearer "+token);
         WebSocketChatClient chatclient = new WebSocketChatClient(new URI(url),httpHeaders);
 
+        if(issecured) {
 
-        // load up the key store
-        String STORETYPE = "JKS";
-        String KEYSTORE = keystorepath;
-        String STOREPASSWORD = storepassword;
-        String KEYPASSWORD = keypassword;
 
-        KeyStore ks = KeyStore.getInstance(STORETYPE);
-        File kf = new File(KEYSTORE);
-        ks.load(new FileInputStream(kf), STOREPASSWORD.toCharArray());
+            // load up the key store
+            String STORETYPE = "JKS";
+            String KEYSTORE = keystorepath;
+            String STOREPASSWORD = storepassword;
+            String KEYPASSWORD = keypassword;
 
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-        kmf.init(ks, KEYPASSWORD.toCharArray());
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-        tmf.init(ks);
+            KeyStore ks = KeyStore.getInstance(STORETYPE);
+            File kf = new File(KEYSTORE);
+            ks.load(new FileInputStream(kf), STOREPASSWORD.toCharArray());
 
-        SSLContext sslContext = null;
-        sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-        // sslContext.init( null, null, null ); // will use java's default key and trust store which is sufficient unless you deal with self-signed certificates
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+            kmf.init(ks, KEYPASSWORD.toCharArray());
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+            tmf.init(ks);
 
-        SSLSocketFactory factory = sslContext
-                .getSocketFactory();// (SSLSocketFactory) SSLSocketFactory.getDefault();
+            SSLContext sslContext = null;
+            sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+            // sslContext.init( null, null, null ); // will use java's default key and trust store which is sufficient unless you deal with self-signed certificates
 
-        chatclient.setSocketFactory(factory);
+            SSLSocketFactory factory = sslContext
+                    .getSocketFactory();// (SSLSocketFactory) SSLSocketFactory.getDefault();
+            chatclient.setSocketFactory(factory);
 
-        chatclient.connectBlocking();
+            chatclient.connectBlocking();
+        }else {
+
+            chatclient.connectBlocking();
+        }
+
+
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
