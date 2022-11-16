@@ -7,6 +7,7 @@
 <li>keystorepath:/Users/wso2carbon.jks</li>
 <li>storepassword:fsdds</li>
 <li>keypassword:fsdfsd</li>
+<li>issecured:true</li>
 </ul>
 
 ## How to run the client <br />
