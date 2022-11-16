@@ -4,15 +4,14 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URI;
 import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import javax.net.SocketFactory;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.*;
+
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -104,14 +103,47 @@ public class SSLClientExample {
             kmf.init(ks, KEYPASSWORD.toCharArray());
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
             tmf.init(ks);
+            TrustManager[] trustAllCerts = new TrustManager [] {new X509ExtendedTrustManager () {
+                @Override
+                public void checkClientTrusted (X509Certificate[] chain, String authType, Socket socket) {
+
+                }
+
+                @Override
+                public void checkServerTrusted (X509Certificate [] chain, String authType, Socket socket) {
+
+                }
+
+                @Override
+                public void checkClientTrusted (X509Certificate [] chain, String authType, SSLEngine engine) {
+
+                }
+
+                @Override
+                public void checkServerTrusted (X509Certificate [] chain, String authType, SSLEngine engine) {
+
+                }
+
+                public java.security.cert.X509Certificate [] getAcceptedIssuers () {
+                    return null;
+                }
+
+                public void checkClientTrusted (X509Certificate [] certs, String authType) {
+                }
+
+                public void checkServerTrusted (X509Certificate [] certs, String authType) {
+                }
+
+            }};
 
             SSLContext sslContext = null;
             sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+            sslContext.init(kmf.getKeyManagers(), trustAllCerts, null);
             // sslContext.init( null, null, null ); // will use java's default key and trust store which is sufficient unless you deal with self-signed certificates
 
             SSLSocketFactory factory = sslContext
                     .getSocketFactory();// (SSLSocketFactory) SSLSocketFactory.getDefault();
+
             chatclient.setSocketFactory(factory);
 
             chatclient.connectBlocking();
